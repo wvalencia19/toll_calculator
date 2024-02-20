@@ -1,0 +1,58 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
+
+# Project-local vendor directory
+vendor/
+
+# Node.js dependencies
+node_modules/
+
+# Golang build directory
+bin/
+
+# Golang build outputs
+dist/
+
+# Dependency directories (remove these lines if you're using vendoring)
+/vendor/
+/Godeps/
+
+# IDE and editor files
+*.swp
+*.swo
+.vscode/
+.idea/
+*.iml
+
+# macOS files
+.DS_Store
+
+# Temporary files
+tmp/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Certificate files
+*.cert
+*.key
+
+# Log files
+*.log
+
+# dotenv environment variables file
+.env
