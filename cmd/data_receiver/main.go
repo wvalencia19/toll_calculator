@@ -9,8 +9,6 @@ import (
 	"github.com/wvalencia19/tolling/types"
 )
 
-var kafkaTopic = "obudata"
-
 func main() {
 
 	recv, err := NewDataReceiver()
@@ -29,11 +27,12 @@ type DataReceiver struct {
 
 func NewDataReceiver() (*DataReceiver, error) {
 	var (
-		p   DataProducer
-		err error
+		p          DataProducer
+		kafkaTopic = "obudata"
+		err        error
 	)
 
-	p, err = NewKafkaProducer()
+	p, err = NewKafkaProducer(kafkaTopic)
 	if err != nil {
 		return nil, err
 	}
