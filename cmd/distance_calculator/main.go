@@ -13,9 +13,16 @@ const (
 
 func main() {
 	calculatorService := NewCalculatorService()
-	calculatorService = NewLogMiddleWare(calculatorService)
 
-	kafkaConsumer, err := NewKafkaConsumer(kafkaConsumer, calculatorService, client.NewClient(aggregatorEndpoint))
+	calculatorService = NewLogMiddleWare(calculatorService)
+	//httpClient := client.NewHTTPClient(aggregatorEndpoint)
+	grpcClient, err := client.NewGrpcClient(aggregatorEndpoint)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	kafkaConsumer, err := NewKafkaConsumer(kafkaConsumer, calculatorService, grpcClient)
 
 	if err != nil {
 		log.Fatal(err)
