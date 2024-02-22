@@ -70,14 +70,16 @@ func handleAggregate(svc Aggregator) http.HandlerFunc {
 
 func handleGetInvoice(svc Aggregator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		values, ok := r.URL.Query()["obu"]
+		queryValues := r.URL.Query()
 
-		if !ok {
+		obuValue := queryValues.Get("obu")
+
+		if obuValue == "" {
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing OBU ID"})
 			return
 		}
 
-		obuID, err := strconv.Atoi(values[0])
+		obuID, err := strconv.Atoi(obuValue)
 		if err != nil {
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid OBU ID"})
 			return
