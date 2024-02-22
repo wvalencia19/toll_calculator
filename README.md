@@ -9,6 +9,22 @@ go get github.com/confluentinc/confluent-kafka-go/kafka
 
 https://developer.confluent.io/quickstart/kafka-local/
 
+### Prometheus
+
+https://github.com/prometheus/prometheus
+
+Run with docker
+
+```
+docker run --name prometheus -d -p 127.0.0.1:9090:9090 prom/prometheus
+```
+
+installing prometheus golang client
+
+```
+go get github.com/prometheus/client_golang/prometheus
+```
+
 
 ### Install protobuf compiler
 

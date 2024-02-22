@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/wvalencia19/tolling/types"
 	"google.golang.org/grpc"
 )
@@ -20,6 +21,7 @@ func main() {
 
 	store := NewMemoryStore()
 	svc := NewInvoiceAggregator(store)
+	svc = NewMetricsMiddleWare(svc)
 	svc = NewLogMiddleWare(svc)
 
 	go func() {
@@ -34,6 +36,7 @@ func makeHTPTransport(listenAddr string, svc Aggregator) error {
 
 	http.HandleFunc("/aggregate", handleAggregate(svc))
 	http.HandleFunc("/invoice", handleGetInvoice(svc))
+	http.Handle("/metrics", promhttp.Handler())
 	return http.ListenAndServe(listenAddr, nil)
 }
 
