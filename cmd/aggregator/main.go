@@ -7,28 +7,34 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 
+	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/wvalencia19/tolling/types"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	httpListenAddr := flag.String("httplistenaddr", ":3000", "the listed address of the HTTP server")
-	grpcListenAddr := flag.String("grpclistenaddr", ":3001", "the listed address of the HTTP server")
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	httpListenAddr := os.Getenv("AGG_HTTP_ENDPOINT")
+	grpcListenAddr := os.Getenv("AGG_GRPC_ENDPOINT")
 	flag.Parse()
 
-	store := NewMemoryStore()
+	store := makeStore()
 	svc := NewInvoiceAggregator(store)
 	svc = NewMetricsMiddleWare(svc)
 	svc = NewLogMiddleWare(svc)
 
 	go func() {
-		log.Fatal(makeGRPCTransport(*grpcListenAddr, svc))
+		log.Fatal(makeGRPCTransport(grpcListenAddr, svc))
 	}()
 
-	log.Fatal(makeHTPTransport(*httpListenAddr, svc))
+	log.Fatal(makeHTPTransport(httpListenAddr, svc))
 }
 
 func makeHTPTransport(listenAddr string, svc Aggregator) error {
@@ -103,4 +109,15 @@ func writeJSON(w http.ResponseWriter, status int, v any) error {
 	w.Header().Add("Content-Type", "application/json")
 
 	return json.NewEncoder(w).Encode(v)
+}
+
+func makeStore() Storer {
+	storeType := os.Getenv("APP_STORE_TYPE")
+	switch storeType {
+	case "memory":
+		return NewMemoryStore()
+	default:
+		log.Fatalf("invalid store type, given %s", storeType)
+		return nil
+	}
 }

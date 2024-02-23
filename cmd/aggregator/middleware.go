@@ -26,8 +26,9 @@ func NewMetricsMiddleWare(next Aggregator) *MatrixMiddleWare {
 	})
 	errCounterCalc := promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: "error_aggregator_request_counter",
-		Name:      "aggregate",
+		Name:      "calculate",
 	})
+
 	reqCounterAgg := promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: "aggregator_request_counter",
 		Name:      "aggregate",

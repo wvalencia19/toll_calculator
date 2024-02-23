@@ -66,3 +66,7 @@ Install package dependencies
 go get google.golang.org/protobuf
 go get google.golang.org/grpc
 ```
+
+### Grafana
+
+data source URL: `http://host.docker.internal:9090c`
