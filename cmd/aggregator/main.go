@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -38,11 +36,17 @@ func main() {
 }
 
 func makeHTPTransport(listenAddr string, svc Aggregator) error {
-	fmt.Println("HTTP transport running on port", listenAddr)
+	aggregateMetricHandler := NewHTTPMetricHandler("aggregate")
+	invoiceMetricHandler := NewHTTPMetricHandler("invoice")
+	aggregatorHandler := makeHTTPHandler(aggregateMetricHandler.instrument(handleAggregate(svc)))
+	invoiceHandler := makeHTTPHandler(invoiceMetricHandler.instrument(handleGetInvoice(svc)))
 
-	http.HandleFunc("/aggregate", handleAggregate(svc))
-	http.HandleFunc("/invoice", handleGetInvoice(svc))
+	http.HandleFunc("/aggregate", aggregatorHandler)
+	http.HandleFunc("/invoice", invoiceHandler)
 	http.Handle("/metrics", promhttp.Handler())
+
+	fmt.Println("http transport running on port", listenAddr)
+
 	return http.ListenAndServe(listenAddr, nil)
 }
 
@@ -61,54 +65,6 @@ func makeGRPCTransport(listenAddr string, svc Aggregator) error {
 	// Register our GRPC server implementation to the GRPC package
 	types.RegisterAggregatorServer(server, NewGRPCAggregatorServer(svc))
 	return server.Serve(ln)
-}
-
-func handleAggregate(svc Aggregator) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var distance types.Distance
-		if err := json.NewDecoder(r.Body).Decode(&distance); err != nil {
-			writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
-			return
-		}
-		if err := svc.AggregateDistance(distance); err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
-			return
-		}
-	}
-}
-
-func handleGetInvoice(svc Aggregator) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		queryValues := r.URL.Query()
-
-		obuValue := queryValues.Get("obu")
-
-		if obuValue == "" {
-			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing OBU ID"})
-			return
-		}
-
-		obuID, err := strconv.Atoi(obuValue)
-		if err != nil {
-			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid OBU ID"})
-			return
-		}
-
-		invoice, err := svc.CalculateInvoice(obuID)
-		if err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
-			return
-		}
-
-		writeJSON(w, http.StatusOK, invoice)
-	}
-}
-
-func writeJSON(w http.ResponseWriter, status int, v any) error {
-	w.WriteHeader(status)
-	w.Header().Add("Content-Type", "application/json")
-
-	return json.NewEncoder(w).Encode(v)
 }
 
 func makeStore() Storer {

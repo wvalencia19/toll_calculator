@@ -38,6 +38,7 @@ func NewKafkaConsumer(topic string, svc Calculator, aggClient client.Client) (*K
 	}, nil
 }
 
+// TODO: pending finish kafka loop
 func (c *KafkaConsumer) Start() {
 	logrus.Info("kafka transport started")
 	c.isRunning = true
@@ -53,9 +54,12 @@ func (c *KafkaConsumer) readMessageLoop() {
 		}
 
 		var data types.OBUData
-
 		if err := json.Unmarshal(msg.Value, &data); err != nil {
 			logrus.Errorf("JSON serialization error %s", err)
+			logrus.WithFields(logrus.Fields{
+				"err":       err,
+				"requestID": data.RequestID,
+			})
 			continue
 		}
 

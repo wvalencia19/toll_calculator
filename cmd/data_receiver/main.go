@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"net/http"
+
+	"math/rand"
 
 	"github.com/gorilla/websocket"
 	"github.com/wvalencia19/tolling/types"
@@ -73,6 +76,7 @@ func (dr *DataReceiver) wsServe() {
 		if err := dr.conn.ReadJSON(&data); err != nil {
 			log.Println("read error:", err)
 		}
+		data.RequestID = rand.Intn(math.MaxInt32)
 		if err := dr.produceData(data); err != nil {
 			fmt.Println("kafka produce error", err)
 		}
