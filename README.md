@@ -1,6 +1,14 @@
 # toll-calculator
 
 
+This system consists of a suite of microservices designed to simulate the reception of GPS coordinates transmitted by vehicles. It processes these coordinates to calculate the distance each vehicle travels. Based on these calculations, it generates invoices that reflect the total distance traveled.
+
+The core objective is to employ a variety of communication protocols between microservices, closely simulating a realistic operational environment. We aim to primarily utilize the native packages provided by Golang to minimize complexity and avoid the overhead introduced by external libraries, especially for HTTP client-server interactions. Furthermore, the project will incorporate advanced logging and metrics instrumentation techniques. We plan to use tools such as Logrus for logging, Prometheus for metrics collection, and Grafana for dashboard creation. 
+
+
+![](diagram.png) 
+
+## Help documentation
 ### Kafka
 
 https://github.com/confluentinc/confluent-kafka-go
